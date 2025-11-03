@@ -1,0 +1,19 @@
+{
+  "clangd.arguments": [
+    "--query-driver=**",
+    "--background-index",
+    "--clang-tidy",
+    "--completion-style=detailed"
+  ],
+  "code-runner.executorMap": {
+    "cpp": "cd $workspaceRoot && g++ -std=c++17 -Wall -Wextra -Ithree-party/include -D_WIN32_WINNT=0x0A00 src/main.cpp -o bin/simple_http_server.exe -lws2_32 && .\\bin\\simple_http_server.exe"
+  },
+  "code-runner.runInTerminal": true,
+  "code-runner.saveFileBeforeRun": true,
+  "files.associations": {
+    "*.jsx": "javascriptreact",
+    "*.js": "javascriptreact",
+    "string": "cpp"
+  }
+}
+

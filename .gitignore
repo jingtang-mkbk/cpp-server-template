@@ -1,0 +1,20 @@
+# Build output
+bin/
+*.o
+*.exe
+
+# clangd cache
+.cache/
+
+# IDE settings that may vary per machine
+.vscode/*.log
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
+*.bak
+*.swp
+

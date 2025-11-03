@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "c:/Users/tangjing/Desktop/ser",
+    "command": "g++ -std=c++17 -O2 -Wall -Wextra -Ithree-party/include -D_WIN32_WINNT=0x0A00 -c src/main.cpp -o bin/main.o",
+    "file": "src/main.cpp"
+  }
+]
