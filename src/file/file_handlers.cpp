@@ -207,8 +207,20 @@ void handle_file_get(const httplib::Request &req, httplib::Response &res) {
 // 处理 /api/file-list 请求（获取所有上传文件的信息）
 void handle_file_list([[maybe_unused]] const httplib::Request &req,
                       httplib::Response &res) {
-  std::string metadata = read_file_metadata();
-  res.set_content(metadata, "application/json; charset=utf-8");
+  std::string metadata_str = read_file_metadata();
+
+  // 解析元数据
+  json file_list;
+  try {
+    file_list = json::parse(metadata_str);
+  } catch (const json::exception &e) {
+    file_list = json::array();
+  }
+
+  // 构建标准响应格式
+  json response = {{"success", true}, {"data", file_list}};
+
+  res.set_content(response.dump(2), "application/json; charset=utf-8");
 }
 
 // 处理 /api/file-delete 请求（通过删除码删除文件）

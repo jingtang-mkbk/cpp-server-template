@@ -105,28 +105,33 @@ GET /api/file-list
 返回示例：
 
 ```json
-[
-  {
-    "filename": "pic.png",
-    "size": 12345,
-    "uploadTime": "2025-11-03T14:30:25",
-    "code": "a8K9xP2m"
-  },
-  {
-    "filename": "document.pdf",
-    "size": 54321,
-    "uploadTime": "2025-11-03T15:45:10",
-    "code": "b7L3qR9n"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "filename": "pic.png",
+      "size": 12345,
+      "uploadTime": "2025-11-03T14:30:25",
+      "code": "a8K9xP2m"
+    },
+    {
+      "filename": "document.pdf",
+      "size": 54321,
+      "uploadTime": "2025-11-03T15:45:10",
+      "code": "b7L3qR9n"
+    }
+  ]
+}
 ```
 
 字段说明：
 
-- `filename`: 文件名
-- `size`: 文件大小（字节）
-- `uploadTime`: 上传时间（ISO 8601 格式）
-- `code`: 删除码（用于删除文件）
+- `success`: 请求是否成功
+- `data`: 文件列表数组
+  - `filename`: 文件名
+  - `size`: 文件大小（字节）
+  - `uploadTime`: 上传时间（ISO 8601 格式）
+  - `code`: 删除码（用于删除文件）
 
 **使用 curl 示例：**
 
@@ -139,10 +144,14 @@ curl http://localhost:8080/api/file-list
 ```javascript
 fetch("http://localhost:8080/api/file-list")
   .then((response) => response.json())
-  .then((files) => {
-    files.forEach((file) => {
-      console.log(`${file.filename} - ${file.size} bytes - ${file.uploadTime}`);
-    });
+  .then((result) => {
+    if (result.success) {
+      result.data.forEach((file) => {
+        console.log(
+          `${file.filename} - ${file.size} bytes - ${file.uploadTime}`
+        );
+      });
+    }
   });
 ```
 
@@ -395,15 +404,9 @@ git clone <repository-url>
 cd ser
 ```
 
-### 2. 安装依赖
+### 2. 编译项目
 
-项目会自动下载 `httplib.h` 头文件：
-
-```bash
-make deps
-```
-
-### 3. 编译项目
+项目依赖已包含在 `three-party/include/` 目录中，无需额外安装。
 
 #### 方法 A：使用 Makefile（推荐）
 
@@ -411,17 +414,17 @@ make deps
 make
 ```
 
+Makefile 会自动收集 `src/` 目录下所有 `.cpp` 文件并编译。
+
 #### 方法 B：手动编译
 
 ```bash
 # 创建输出目录
 mkdir -p bin
 
-# 编译
+# 编译（自动包含所有模块）
 g++ -std=c++17 -O2 -Wall -Wextra -Ithree-party/include -D_WIN32_WINNT=0x0A00 \
-    src/main.cpp src/routes.cpp \
-    src/file/file_routes.cpp src/file/file_handlers.cpp src/file/file_manager.cpp \
-    src/test/test_routes.cpp src/test/test_handlers.cpp \
+    src/*.cpp src/**/*.cpp \
     -o bin/simple_http_server.exe -lws2_32
 ```
 
@@ -698,9 +701,12 @@ make distclean
 
 ## 🛠️ 常见问题
 
-### Q: 编译时找不到 `httplib.h`？
+### Q: 编译时找不到 `httplib.h` 或 `json.hpp`？
 
-A: 运行 `make deps` 安装依赖，或手动下载 [httplib.h](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h) 到 `three-party/include/` 目录。
+A: 确保以下文件存在：
+
+- `three-party/include/httplib.h` - [下载地址](https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h)
+- `three-party/include/json.hpp` - [下载地址](https://github.com/nlohmann/json/releases)
 
 ### Q: clangd 报错找不到标准库头文件？
 
