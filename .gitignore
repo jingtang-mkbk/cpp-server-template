@@ -2,7 +2,7 @@
 bin/
 *.o
 *.exe
-
+assets/
 # clangd cache
 .cache/
 

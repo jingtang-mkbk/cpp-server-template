@@ -20,12 +20,16 @@ endif
 
 BIN_DIR := bin
 OUT := $(BIN_DIR)/simple_http_server$(EXE)
-SRC := src/main.cpp
 
-# Header-only dependency: cpp-httplib
+# 自动收集 src 目录下的所有 .cpp 文件（递归）
+SRC := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
+
+# Header-only dependencies
 HTTPLIB_HDR := three-party/include/httplib.h
 HTTPLIB_REPO := https://github.com/yhirose/cpp-httplib.git
 HTTPLIB_CLONE_DIR := three-party/cpp-httplib
+
+JSON_HDR := three-party/include/json.hpp
 
 .PHONY: all run clean distclean deps
 
@@ -37,8 +41,8 @@ $(OUT): deps $(SRC) | $(BIN_DIR)
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
-# Fetch header if missing
-deps: $(HTTPLIB_HDR)
+# Fetch headers if missing
+deps: $(HTTPLIB_HDR) $(JSON_HDR)
 
 $(HTTPLIB_HDR):
 	@mkdir -p three-party/include
@@ -46,6 +50,9 @@ $(HTTPLIB_HDR):
 		git clone --depth 1 $(HTTPLIB_REPO) $(HTTPLIB_CLONE_DIR); \
 	fi
 	@cp -f $(HTTPLIB_CLONE_DIR)/httplib.h $(HTTPLIB_HDR)
+
+$(JSON_HDR):
+	@echo "json.hpp already exists, skipping download"
 
 run: $(OUT)
 	./$(OUT)
