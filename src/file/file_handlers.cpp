@@ -101,8 +101,10 @@ void handle_file_upload(const httplib::Request &req, httplib::Response &res) {
   // 检查文件大小
   if (file.content.size() > MAX_FILE_SIZE) {
     res.status = 413;
-    res.set_content("{\"error\":\"File too large. Maximum size is 100MB.\"}",
-                    "application/json; charset=utf-8");
+    json error = {{"error", "File too large. Maximum size is 2GB."},
+                  {"maxSize", MAX_FILE_SIZE},
+                  {"fileSize", file.content.size()}};
+    res.set_content(error.dump(), "application/json; charset=utf-8");
     return;
   }
 

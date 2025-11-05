@@ -4,7 +4,7 @@
 #include <httplib.h>
 
 // 配置常量
-#define MAX_FILE_SIZE (100 * 1024 * 1024) // 100MB 文件大小限制
+#define MAX_FILE_SIZE (2LL * 1024 * 1024 * 1024) // 2GB 文件大小限制
 
 // 文件操作处理函数
 
