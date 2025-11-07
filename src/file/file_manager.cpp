@@ -11,7 +11,7 @@
 
 using json = nlohmann::json;
 
-#define METADATA_FILE "assets/.file_metadata.json"
+#define METADATA_FILE "meta/file_metadata.json"
 
 // 生成随机删除码（8位字母数字组合）
 std::string generate_delete_code() {
@@ -42,6 +42,12 @@ std::string get_current_timestamp() {
 bool save_file_metadata(const std::string &filename, size_t size,
                         const std::string &timestamp,
                         const std::string &delete_code) {
+  // 确保 meta 目录存在
+  std::filesystem::path meta_dir("meta");
+  if (!std::filesystem::exists(meta_dir)) {
+    std::filesystem::create_directory(meta_dir);
+  }
+
   json metadata_array;
 
   // 读取现有元数据

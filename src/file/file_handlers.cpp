@@ -69,92 +69,106 @@ static bool is_valid_filename(const std::string &filename) {
 
 // 处理 /api/file-upload 请求（文件上传）
 void handle_file_upload(const httplib::Request &req, httplib::Response &res) {
-  // 检查是否有文件被上传
-  if (!req.form.has_file("file")) {
-    res.status = 400;
-    res.set_content(
-        "{\"error\":\"No file uploaded. Use 'file' as the field name.\"}",
-        "application/json; charset=utf-8");
-    return;
-  }
+  try {
+    // 检查是否有文件被上传
+    if (!req.form.has_file("file")) {
+      res.status = 400;
+      res.set_content(
+          "{\"error\":\"No file uploaded. Use 'file' as the field name.\"}",
+          "application/json; charset=utf-8");
+      return;
+    }
 
-  const auto &file = req.form.get_file("file");
+    const auto &file = req.form.get_file("file");
 
-  // 获取文件名（优先使用客户端指定的文件名）
-  std::string filename = file.filename;
-  if (filename.empty()) {
-    res.status = 400;
-    res.set_content("{\"error\":\"Invalid filename\"}",
-                    "application/json; charset=utf-8");
-    return;
-  }
+    // 获取文件名（优先使用客户端指定的文件名）
+    std::string filename = file.filename;
+    if (filename.empty()) {
+      res.status = 400;
+      res.set_content("{\"error\":\"Invalid filename\"}",
+                      "application/json; charset=utf-8");
+      return;
+    }
 
-  // 验证文件名安全性
-  if (!is_valid_filename(filename)) {
-    res.status = 400;
-    res.set_content("{\"error\":\"Invalid filename. Filename cannot contain "
-                    "path separators.\"}",
-                    "application/json; charset=utf-8");
-    return;
-  }
+    // 验证文件名安全性
+    if (!is_valid_filename(filename)) {
+      res.status = 400;
+      res.set_content("{\"error\":\"Invalid filename. Filename cannot contain "
+                      "path separators.\"}",
+                      "application/json; charset=utf-8");
+      return;
+    }
 
-  // 检查文件大小
-  if (file.content.size() > MAX_FILE_SIZE) {
-    res.status = 413;
-    json error = {{"error", "File too large. Maximum size is 2GB."},
-                  {"maxSize", MAX_FILE_SIZE},
-                  {"fileSize", file.content.size()}};
-    res.set_content(error.dump(), "application/json; charset=utf-8");
-    return;
-  }
+    // 检查文件大小
+    if (file.content.size() > MAX_FILE_SIZE) {
+      res.status = 413;
+      json error = {{"error", "File too large. Maximum size is 2GB."},
+                    {"maxSize", MAX_FILE_SIZE},
+                    {"fileSize", file.content.size()}};
+      res.set_content(error.dump(), "application/json; charset=utf-8");
+      return;
+    }
 
-  // 确保 assets 目录存在
-  std::filesystem::path assets_dir("assets");
-  if (!std::filesystem::exists(assets_dir)) {
-    std::filesystem::create_directory(assets_dir);
-  }
+    // 确保 assets 目录存在
+    std::filesystem::path assets_dir("assets");
+    if (!std::filesystem::exists(assets_dir)) {
+      std::filesystem::create_directory(assets_dir);
+    }
 
-  // 构建目标文件路径
-  std::filesystem::path filepath = assets_dir / filename;
+    // 构建目标文件路径
+    std::filesystem::path filepath = assets_dir / filename;
 
-  // 检查文件是否已存在（可选：如果需要覆盖，移除此检查）
-  if (std::filesystem::exists(filepath)) {
-    res.status = 409;
-    res.set_content("{\"error\":\"File already exists\"}",
-                    "application/json; charset=utf-8");
-    return;
-  }
+    // 检查文件是否已存在（可选：如果需要覆盖，移除此检查）
+    if (std::filesystem::exists(filepath)) {
+      res.status = 409;
+      res.set_content("{\"error\":\"File already exists\"}",
+                      "application/json; charset=utf-8");
+      return;
+    }
 
-  // 写入文件
-  std::ofstream ofs(filepath, std::ios::binary);
-  if (!ofs.is_open()) {
+    // 写入文件
+    std::ofstream ofs(filepath, std::ios::binary);
+    if (!ofs.is_open()) {
+      res.status = 500;
+      res.set_content("{\"error\":\"Failed to save file\"}",
+                      "application/json; charset=utf-8");
+      return;
+    }
+
+    ofs.write(file.content.data(), file.content.size());
+    ofs.close();
+
+    // 保存文件元数据
+    std::string timestamp = get_current_timestamp();
+    std::string delete_code = generate_delete_code();
+    if (!save_file_metadata(filename, file.content.size(), timestamp,
+                            delete_code)) {
+      std::cerr << "Warning: Failed to save file metadata for " << filename
+                << std::endl;
+    }
+
+    // 返回成功响应（使用 nlohmann/json）
+    json response = {{"success", true},
+                     {"filename", filename},
+                     {"size", file.content.size()},
+                     {"uploadTime", timestamp},
+                     {"code", delete_code},
+                     {"path", "/api/file-get?name=" + filename}};
+
+    res.set_content(response.dump(), "application/json; charset=utf-8");
+  } catch (const std::exception &e) {
+    // 捕获所有异常
     res.status = 500;
-    res.set_content("{\"error\":\"Failed to save file\"}",
+    std::cerr << "Exception in file upload: " << e.what() << std::endl;
+    json error = {{"error", "Internal server error"}, {"details", e.what()}};
+    res.set_content(error.dump(), "application/json; charset=utf-8");
+  } catch (...) {
+    // 捕获未知异常
+    res.status = 500;
+    std::cerr << "Unknown exception in file upload" << std::endl;
+    res.set_content("{\"error\":\"Unknown internal error\"}",
                     "application/json; charset=utf-8");
-    return;
   }
-
-  ofs.write(file.content.data(), file.content.size());
-  ofs.close();
-
-  // 保存文件元数据
-  std::string timestamp = get_current_timestamp();
-  std::string delete_code = generate_delete_code();
-  if (!save_file_metadata(filename, file.content.size(), timestamp,
-                          delete_code)) {
-    std::cerr << "Warning: Failed to save file metadata for " << filename
-              << std::endl;
-  }
-
-  // 返回成功响应（使用 nlohmann/json）
-  json response = {{"success", true},
-                   {"filename", filename},
-                   {"size", file.content.size()},
-                   {"uploadTime", timestamp},
-                   {"code", delete_code},
-                   {"path", "/api/file-get?name=" + filename}};
-
-  res.set_content(response.dump(), "application/json; charset=utf-8");
 }
 
 // 处理 /api/file-get 请求（文件下载）
@@ -277,7 +291,7 @@ void handle_file_preview(const httplib::Request &req, httplib::Response &res) {
   }
 
   // 从元数据中查找对应的文件
-  std::ifstream ifs("assets/.file_metadata.json");
+  std::ifstream ifs("meta/file_metadata.json");
   if (!ifs.is_open()) {
     res.status = 404;
     json error = {{"error", "Metadata not found"}};
