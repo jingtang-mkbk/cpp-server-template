@@ -4,7 +4,7 @@
 
 void handle_test([[maybe_unused]] const httplib::Request &req,
                  httplib::Response &res) {
-  const std::string body = "{\"data\":\"success\"}";
+  const std::string body = "{\"data\":\"success test\"}";
   res.set_content(body, "application/json; charset=utf-8");
 }
 
