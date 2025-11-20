@@ -1,5 +1,12 @@
 #include "test_routes.h"
-#include "test_handlers.h"
+#include <httplib.h>
+#include <string>
+
+void handle_test([[maybe_unused]] const httplib::Request &req,
+                 httplib::Response &res) {
+  const std::string body = "{\"data\":\"success\"}";
+  res.set_content(body, "application/json; charset=utf-8");
+}
 
 // 配置测试相关路由
 void configure_test_routes(httplib::Server &server) {

@@ -5,6 +5,7 @@ bin/
 assets/
 # clangd cache
 .cache/
+obj/
 
 # IDE settings that may vary per machine
 .vscode/*.log
