@@ -3,6 +3,7 @@ bin/
 *.o
 *.exe
 assets/
+meta/
 # clangd cache
 .cache/
 obj/

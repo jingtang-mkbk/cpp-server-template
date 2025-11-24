@@ -29,29 +29,98 @@ static std::string get_file_type(const std::string &ext) {
 static std::string get_content_type(const std::filesystem::path &filepath) {
   std::string ext = filepath.extension().string();
 
-  if (ext == ".html" || ext == ".htm") {
-    return "text/html; charset=utf-8";
-  } else if (ext == ".css") {
+  // Text types
+  if (ext == ".css") {
     return "text/css; charset=utf-8";
-  } else if (ext == ".js") {
-    return "application/javascript; charset=utf-8";
-  } else if (ext == ".json") {
-    return "application/json; charset=utf-8";
-  } else if (ext == ".png") {
-    return "image/png";
-  } else if (ext == ".jpg" || ext == ".jpeg") {
-    return "image/jpeg";
-  } else if (ext == ".gif") {
-    return "image/gif";
-  } else if (ext == ".svg") {
-    return "image/svg+xml";
+  } else if (ext == ".csv") {
+    return "text/csv; charset=utf-8";
   } else if (ext == ".txt") {
     return "text/plain; charset=utf-8";
-  } else if (ext == ".mp4") {
+  } else if (ext == ".vtt") {
+    return "text/vtt; charset=utf-8";
+  } else if (ext == ".html" || ext == ".htm") {
+    return "text/html; charset=utf-8";
+  } else if (ext == ".js" || ext == ".mjs") {
+    return "text/javascript; charset=utf-8";
+  }
+  // Image types
+  else if (ext == ".apng") {
+    return "image/apng";
+  } else if (ext == ".avif") {
+    return "image/avif";
+  } else if (ext == ".bmp") {
+    return "image/bmp";
+  } else if (ext == ".gif") {
+    return "image/gif";
+  } else if (ext == ".png") {
+    return "image/png";
+  } else if (ext == ".svg") {
+    return "image/svg+xml";
+  } else if (ext == ".webp") {
+    return "image/webp";
+  } else if (ext == ".ico") {
+    return "image/x-icon";
+  } else if (ext == ".tif" || ext == ".tiff") {
+    return "image/tiff";
+  } else if (ext == ".jpg" || ext == ".jpeg") {
+    return "image/jpeg";
+  }
+  // Video types
+  else if (ext == ".mp4") {
     return "video/mp4";
+  } else if (ext == ".mpeg") {
+    return "video/mpeg";
   } else if (ext == ".webm") {
     return "video/webm";
-  } else if (ext == ".avi") {
+  }
+  // Audio types
+  else if (ext == ".mp3") {
+    return "audio/mp3";
+  } else if (ext == ".mpga") {
+    return "audio/mpeg";
+  } else if (ext == ".weba") {
+    return "audio/webm";
+  } else if (ext == ".wav") {
+    return "audio/wave";
+  }
+  // Font types
+  else if (ext == ".otf") {
+    return "font/otf";
+  } else if (ext == ".ttf") {
+    return "font/ttf";
+  } else if (ext == ".woff") {
+    return "font/woff";
+  } else if (ext == ".woff2") {
+    return "font/woff2";
+  }
+  // Application types
+  else if (ext == ".7z") {
+    return "application/x-7z-compressed";
+  } else if (ext == ".atom") {
+    return "application/atom+xml";
+  } else if (ext == ".pdf") {
+    return "application/pdf";
+  } else if (ext == ".json") {
+    return "application/json";
+  } else if (ext == ".rss") {
+    return "application/rss+xml";
+  } else if (ext == ".tar") {
+    return "application/x-tar";
+  } else if (ext == ".xhtml" || ext == ".xht") {
+    return "application/xhtml+xml";
+  } else if (ext == ".xslt") {
+    return "application/xslt+xml";
+  } else if (ext == ".xml") {
+    return "application/xml";
+  } else if (ext == ".gz") {
+    return "application/gzip";
+  } else if (ext == ".zip") {
+    return "application/zip";
+  } else if (ext == ".wasm") {
+    return "application/wasm";
+  }
+  // 兼容旧代码中的视频格式
+  else if (ext == ".avi") {
     return "video/x-msvideo";
   } else if (ext == ".mov") {
     return "video/quicktime";
