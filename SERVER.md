@@ -1,5 +1,5 @@
 
-#创建 systemd 服务文件
+# 创建 systemd 服务文件
 sudo nano /etc/systemd/system/simple-http-server.service
 
 [Unit]
