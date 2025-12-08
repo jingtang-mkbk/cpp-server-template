@@ -11,6 +11,23 @@ int main() {
   // 创建服务器实例
   httplib::Server server;
 
+  // 配置CORS支持 - 在所有响应后添加CORS头
+  server.set_post_routing_handler(
+      []([[maybe_unused]] const httplib::Request &req, httplib::Response &res) {
+        // 允许的源（可以根据需要修改为特定域名，或使用
+        // req.get_header_value("Origin")）
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Access-Control-Allow-Methods",
+                       "GET, POST, PUT, DELETE, OPTIONS");
+        res.set_header("Access-Control-Allow-Headers",
+                       "Content-Type, Authorization, X-Requested-With");
+        res.set_header("Access-Control-Max-Age", "3600");
+      });
+
+  // 处理OPTIONS预检请求
+  server.Options(".*", []([[maybe_unused]] const httplib::Request &req,
+                          httplib::Response &res) { res.status = 200; });
+
   // 配置所有路由
   configure_routes(server);
 
