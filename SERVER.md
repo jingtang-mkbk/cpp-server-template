@@ -32,5 +32,8 @@ sudo systemctl enable simple-http-server
 # 立即启动服务
 sudo systemctl start simple-http-server
 
+# 重启服务
+sudo systemctl restart simple-http-server
+
 # 检查服务状态
 sudo systemctl status simple-http-server
