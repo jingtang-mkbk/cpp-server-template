@@ -1,10 +1,12 @@
 #include "test_routes.h"
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 #include <httplib.h>
 #include <json.hpp>
 #include <memory>
 #include <string>
+#include <thread>
 
 using json = nlohmann::json;
 
@@ -19,7 +21,7 @@ struct StreamState {
   size_t pos;
   int phase; // 0=起始 1=数据 2=结束
   size_t chunk_index;
-  static constexpr size_t CHUNK_SIZE = 200;
+  static constexpr size_t CHUNK_SIZE = 100;
 };
 
 // 流式返回：合并 index.html、main.js、style.css，用
@@ -79,6 +81,7 @@ void handle_test_stream([[maybe_unused]] const httplib::Request &req,
             state->phase = 2;
             return true;
           }
+          std::this_thread::sleep_for(std::chrono::milliseconds(10));
           size_t chunk = (std::min)(StreamState::CHUNK_SIZE,
                                     state->merged.size() - state->pos);
           std::string chunk_str;
@@ -105,6 +108,7 @@ void handle_test_stream([[maybe_unused]] const httplib::Request &req,
         }
 
         // 阶段 2：发送结束
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         json end = {{"type", "end"},
                     {"total_chunks", state->chunk_index},
                     {"total_bytes", state->pos}};
